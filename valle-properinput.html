@@ -1,0 +1,233 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="valle-properinput">
+  <template>
+
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        width: var(--valle-input-width, 100%);
+      }
+
+      .visual-hidden {
+        position: absolute;
+        left: -10000px;
+      }
+
+      .input {
+        border: 0;
+        border-bottom: 2px solid rgba(0, 0, 0, .87);
+        color: rgba(0, 0, 0, .87);
+        display: block;
+        font-size: 16px;
+        margin-top: 29px;
+        outline: 0;
+        padding: 8px 0;
+        width: 100%;
+      }
+
+      .input:focus {
+        border-color: var(--valle-input-color, rgb(5, 159, 183));
+      }
+
+      .label {
+        color: rgba(0, 0, 0, .54);
+        display: block;
+        font-size: 12px;
+        left: 0;
+        padding-top: 16px;
+        position: absolute;
+        top: 0;
+      }
+
+      .input:focus + .label {
+        color: var(--valle-input-color, rgba(5, 159, 183, .87));
+      }
+
+      .description {
+        color: rgba(0, 0, 0, .54);
+        display: block;
+        font-size: 12px;
+        padding-top: 8px;
+      }
+
+      :host([error]) .description,
+      :host([error]) .label,
+      :host([error]) .input:focus + .label {
+        color: rgba(255, 0, 0, .87);
+      }
+
+      :host([error]) .input {
+        border-color: rgb(255, 0, 0);
+      }
+
+      :host([disabled]) .input {
+        background-color: initial;
+        border-bottom: 1px dotted rgba(0, 0, 0, .42);
+        color: rgba(0, 0, 0, .38);
+      }
+
+      :host([disabled]) .label {
+        color: rgba(0, 0, 0, .38);
+      }
+
+      :host([required]) .label::after {
+        content: ' *';
+      }
+
+    </style>
+
+    <input
+      id="input"
+      class="input"
+      type=text
+      placeholder=[[placeholder]]
+      aria-labelledby="inputLabel"
+      aria-describedby="description"
+      autofocus=[[autofocus]]
+      value=[[value]]
+    >
+
+    <label id="inputLabel" class="label">[[label]]</label>
+
+    <template is="dom-if" if={{_isNoError(helpertext,error)}}>
+      <small id="description" class="description">[[helpertext]]</small>
+    </template>
+
+    <template is="dom-if" if=[[error]]>
+      <span role="alert" id="description" class="description">
+        [[errortext]]<small class="visual-hidden">: [[helpertext]]</small>
+      </span>
+    </template>
+
+  </template>
+
+  <script>
+    class valleProperInput extends Polymer.Element {
+
+      static get is() {
+        return 'valle-properinput';
+      }
+
+      ready() {
+        super.ready();
+
+        this.addEventListener('keyup', this._bindValue.bind(this));
+
+        this.addEventListener('blur', this._isProper.bind(this));
+
+        if (this.required) {
+          this.addEventListener('blur', this._validateRequired.bind(this));
+        }
+
+        if (this.maxlength) {
+          this._maxlengthControl.bind(this, this.maxlength)();
+        }
+      };
+
+      _isProper() {
+        const input = this.$.input;
+        const inputWords = input.value.split(" ");
+
+        const props = ['a', 'ante', 'após', 'até', 'com', 'conforme', 'contra', 'consoante', 'de', 'desde', 'durante', 'em', 'excepto', 'entre', 'mediante', 'para', 'perante', 'por', 'salvo', 'sem', 'segundo', 'sob', 'sobre', 'trás', 'e', 'mas', 'ainda', 'também', 'nem', 'contudo', 'entretanto', 'não', 'obstante', 'no', 'entanto', 'porém', 'todavia', 'já', 'ou', 'ora', 'quer', 'assim', 'então', 'logo', 'pois', 'conseguinte', 'isso', 'portanto', 'porquanto', 'porque', 'que', 'como', 'á', 'uma', 'vez', 'visto', 'como', 'embora', 'conquanto', 'mesmo', 'posto', 'bem', 'se', 'apesar', 'caso', 'quando', 'salvo', 'dado', 'menos', 'ser', 'fim', 'à', 'medida', 'ao', 'passo', 'proporção', 'enquanto', 'quanto', 'mais', 'sentido', 'tanto', 'antes', 'depois', 'sempre', 'todas', 'vezes', 'cada', 'apenas', 'mal', 'maior', 'menor', 'melhor', 'pior', 'qual', 'tão', 'tal', 'modo', 'maneira', 'o'];
+
+        const normalizedWords = inputWords.map((word, i) => {
+          word = this._capitalize(word);
+          if (!i) {
+            return word;
+          } else {
+            props.forEach(prop => {
+              if (word.toLowerCase() === prop.toLowerCase()) {
+                word = word.toLowerCase();
+              }
+            });
+          return word;
+          }
+        });
+
+        const normalizedText = normalizedWords.join(" ");
+
+        input.value = normalizedText;
+      }
+
+      _capitalize(text) {
+        return text.toLowerCase().replace(/\b\w/, l => l.toUpperCase());
+      }
+
+      _bindValue() {
+        this.value = this.$.input.value;
+      };
+
+      _isNoError(helpertext, error) {
+        return helpertext && !error;
+      };
+
+      _toogleRequired(required) {
+        required
+          ? this.$.input.setAttribute('aria-required', true)
+          : this.$.input.removeAttribute('aria-required');
+      };
+
+      _toogleDisabled(disabled) {
+        disabled
+          ? this.$.input.setAttribute('disabled', true)
+          : this.$.input.removeAttribute('disabled');
+      };
+
+      _validateRequired() {
+        const valueInput = this.$.input.value;
+        const isEmpty = valueInput.length === 0;
+
+        isEmpty
+          ? this.setAttribute('error', true)
+          : this.removeAttribute('error');
+      };
+
+      _maxlengthControl(maxlength) {
+        const input = this.$.input;
+
+        input.setAttribute('maxlength', maxlength);
+
+      };
+
+      static get properties() {
+        return {
+          label: String,
+          placeholder: String,
+          helpertext: String,
+          maxlength: Number,
+          errortext: String,
+          value: {
+            type: String,
+            reflectToAttribute: true
+          },
+          error: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          },
+          required: {
+            type: Boolean,
+            value: false,
+            observer: '_toogleRequired'
+          },
+          disabled: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+            observer: '_toogleDisabled'
+          },
+          autofocus: {
+            type: Boolean,
+            value: false
+          }
+        };
+      }
+    }
+
+    window.customElements.define(valleProperInput.is, valleProperInput);
+  </script>
+</dom-module>

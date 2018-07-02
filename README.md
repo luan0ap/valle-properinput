@@ -38,9 +38,17 @@ $ bower install valle-properinput --save
 
 ## Properties
 
-Property  | Type        | Default   | Description
-:---      |:---         |:---       |:---
-`prop1`   | *String*    | `World`   | Prop description
+Property      | Type        | Default   | Description
+:---          |:---         |:---       |:---
+`label`       | *String*    | `""`      | Default label
+`placeholder` | *String*    | `""`      | Default placeholder
+`helpertext`  | *String*    | `""`      | Description text for help
+`errortext`   | *Srting*    | `""`      | Error message
+`value`       | *String*    | `""`      | Input value
+`error`       | *Boolean*   | `false`   | Error state
+`required`    | *Boolean*   | `false`   | Required validate
+`disabled`    | *Boolean*   | `false`   | Disabled state
+`autofocus`   | *Boolean*   | `false`   | Default autofocus
 
 ## Styling
 
@@ -48,8 +56,8 @@ The following custom properties and mixins are available for styling:
 
 Custom property                | Default  | Description
 :---                           |:---      |:---
---valle-element-text-color       | #f44277  | Text color
---valle-element-text             | {}       | Text styles
+--valle-input-color       | `rgba(5, 159, 183, .87)`  | Primary color
+--valle-input-width       | `100%`                    | Input Width
 
 
 ## Browser Support
@@ -82,39 +90,6 @@ $ polymer serve
 
 Go to [localhost:8080/components/valle-properinput/](http://localhost:8080/components/valle-properinput/)
 
-
-## Tests
-
-#### Linting
-
-Linting with eslint:
-
-```sh
-$ [sudo] yarn global add eslint
-$ [sudo] yarn global add eslint-plugin-html
-
-$ eslint *.html
-```
-
-Linting with polylint:
-
-```sh
-$ polymer lint
-```
-
-#### Unit tests
-
-Install the Web Component Tester (WCT) test runner:
-
-```sh
-$ [sudo] yarn global add web-component-tester
-```
-
-Run tests:
-
-```sh
-$ wct
-```
 
 ## Versioning
 
